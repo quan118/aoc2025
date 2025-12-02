@@ -2,11 +2,15 @@ import 'puzzle.dart';
 import 'input.dart';
 
 import '../day01.dart' as day01;
+import '../day02.dart' as day02;
 
 typedef PuzzleFactory = Puzzle Function();
 
 class PuzzleRunner {
-  final List<PuzzleFactory> _registry = [() => day01.Day01()];
+  final List<PuzzleFactory> _registry = [
+    () => day01.Day01(),
+    () => day02.Day02(),
+  ];
 
   void run({required int day, required int part}) {
     if (_registry.length < day) {
