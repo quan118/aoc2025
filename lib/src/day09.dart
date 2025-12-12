@@ -5,199 +5,199 @@ class Day09 extends Puzzle {
   @override
   String solvePart1(String input) {
     final lines = input.split('\n');
-    final coords = lines
+    final verts = lines
         .map((line) => line.split(',').map(int.parse).toList())
         .toList();
-    var largest = 0;
-    for (int i = 0; i < coords.length - 1; ++i) {
-      for (int j = i + 1; j < coords.length; ++j) {
+    var maxArea = 0;
+    for (int i = 0; i < verts.length - 1; ++i) {
+      for (int j = i + 1; j < verts.length; ++j) {
         final area =
-            (coords[i][0] - coords[j][0] + 1).abs() *
-            (coords[i][1] - coords[j][1] + 1).abs();
-        largest = max(largest, area);
-        // print("i: $i, j: $j, area: $area");
+            ((verts[i][0] - verts[j][0]).abs() + 1) *
+            ((verts[i][1] - verts[j][1]).abs() + 1);
+        maxArea = max(maxArea, area);
       }
     }
-    return largest.toString();
+    return maxArea.toString();
   }
 
   @override
   String solvePart2(String input) {
     final lines = input.split('\n');
-    final coords = lines
+    final verts = lines
         .map((line) => line.split(',').map(int.parse).toList())
         .toList();
 
-    var largest = 0;
-    for (int i = 0; i < coords.length - 1; ++i) {
-      for (int j = i + 1; j < coords.length; ++j) {
-        if (i != 0 || j != 4) continue;
-        if (coords[i][0] == coords[j][0] || coords[i][1] == coords[j][1]) {
+    var maxArea = 0;
+    for (int i = 0; i < verts.length - 1; ++i) {
+      for (int j = i + 1; j < verts.length; ++j) {
+        if (verts[i][0] == verts[j][0] || verts[i][1] == verts[j][1]) {
           continue;
         }
         final topLeft = (
-          min(coords[i][0], coords[j][0]),
-          min(coords[i][1], coords[j][1]),
+          min(verts[i][0], verts[j][0]),
+          min(verts[i][1], verts[j][1]),
         );
         final topRight = (
-          max(coords[i][0], coords[j][0]),
-          min(coords[i][1], coords[j][1]),
+          max(verts[i][0], verts[j][0]),
+          min(verts[i][1], verts[j][1]),
         );
         final bottomLeft = (
-          min(coords[i][0], coords[j][0]),
-          max(coords[i][1], coords[j][1]),
+          min(verts[i][0], verts[j][0]),
+          max(verts[i][1], verts[j][1]),
         );
         final bottomRight = (
-          max(coords[i][0], coords[j][0]),
-          max(coords[i][1], coords[j][1]),
+          max(verts[i][0], verts[j][0]),
+          max(verts[i][1], verts[j][1]),
         );
-        print("i: $i, j: $j");
-        print("topLeft: ${topLeft.$1},${topLeft.$2}");
-        print("topRight: ${topRight.$1},${topRight.$2}");
-        print("bottomLeft: ${bottomLeft.$1},${bottomLeft.$2}");
-        print("bottomRight: ${bottomRight.$1},${bottomRight.$2}");
-        final isTopHorizontalInside = checkHorizontalSegmentInside(
-          coords,
+
+        final isTopLeftInsideOrOnEdge = isPointInsideOrOnEdge(
+          topLeft.$1,
+          topLeft.$2,
+          verts,
+        );
+        final isTopRightInsideOrOnEdge = isPointInsideOrOnEdge(
+          topRight.$1,
+          topRight.$2,
+          verts,
+        );
+        final isBottomLeftInsideOrOnEdge = isPointInsideOrOnEdge(
+          bottomLeft.$1,
+          bottomLeft.$2,
+          verts,
+        );
+        final isBottomRightInsideOrOnEdge = isPointInsideOrOnEdge(
+          bottomRight.$1,
+          bottomRight.$2,
+          verts,
+        );
+
+        if (!isTopLeftInsideOrOnEdge ||
+            !isTopRightInsideOrOnEdge ||
+            !isBottomLeftInsideOrOnEdge ||
+            !isBottomRightInsideOrOnEdge) {
+          continue;
+        }
+
+        final topEdgeClear = isHorizontalSegmentClearOfPolygonEdges(
+          verts,
           topLeft.$1,
           topRight.$1,
           topLeft.$2,
         );
-        final isBottomHorizontalInside = checkHorizontalSegmentInside(
-          coords,
+        final bottomEdgeClear = isHorizontalSegmentClearOfPolygonEdges(
+          verts,
           bottomLeft.$1,
           bottomRight.$1,
           bottomLeft.$2,
         );
-        final isLeftVerticalInside = checkVerticalSegmentInside(
-          coords,
+        final leftEdgeClear = isVerticalSegmentClearOfPolygonEdges(
+          verts,
           topLeft.$2,
           bottomLeft.$2,
           topLeft.$1,
         );
-        final isRightVerticalInside = checkVerticalSegmentInside(
-          coords,
+        final rightEdgeClear = isVerticalSegmentClearOfPolygonEdges(
+          verts,
           topRight.$2,
           bottomRight.$2,
           topRight.$1,
         );
-        print("isTopHorizontalInside: $isTopHorizontalInside");
-        print("isBottomHorizontalInside: $isBottomHorizontalInside");
-        print("isLeftVerticalInside: $isLeftVerticalInside");
-        print("isRightVerticalInside: $isRightVerticalInside");
-        if (isTopHorizontalInside &&
-            isBottomHorizontalInside &&
-            isLeftVerticalInside &&
-            isRightVerticalInside) {
+
+        if (topEdgeClear &&
+            bottomEdgeClear &&
+            leftEdgeClear &&
+            rightEdgeClear) {
           final area =
-              (coords[i][0] - coords[j][0] + 1).abs() *
-              (coords[i][1] - coords[j][1] + 1).abs();
-          print("i: $i, j: $j");
-          largest = max(largest, area);
+              ((verts[i][0] - verts[j][0]).abs() + 1) *
+              ((verts[i][1] - verts[j][1]).abs() + 1);
+          maxArea = max(maxArea, area);
         }
       }
     }
-    return largest.toString();
+    return maxArea.toString();
   }
 
-  bool checkHorizontalSegmentInside(
-    List<List<int>> coords,
+  bool isHorizontalSegmentClearOfPolygonEdges(
+    List<List<int>> verts,
     int x1,
     int x2,
     int y,
   ) {
-    print("checkHorizontalSegmentInside: $x1, $x2, $y");
-    var tIntersections =
-        <
-          (int, int, int)
-        >[]; // second parameter is intersection type, third parameter is intersection index
-    var intersections = <int>[];
-    for (int i = 0; i < coords.length; i++) {
-      final j = i == coords.length - 1 ? 0 : i + 1;
-      if (coords[i][1] == coords[j][1]) {
+    for (int i = 0; i < verts.length; i++) {
+      final j = i == verts.length - 1 ? 0 : i + 1;
+      if (verts[i][1] == verts[j][1]) {
         // only check vertical lines
         continue;
       }
-      final y1 = min(coords[i][1], coords[j][1]);
-      final y2 = max(coords[i][1], coords[j][1]);
-      if (y < y1 || y2 < y) {
-        continue;
-      }
-      if (y1 < y && y < y2) {
-        tIntersections.add((coords[i][0], 0, -1)); // don't need index
-      } else if (y1 == y) {
-        tIntersections.add((
-          coords[i][0],
-          -1,
-          coords[i][0] < coords[j][0] ? i : j,
-        ));
-      } else if (y2 == y) {
-        tIntersections.add((
-          coords[j][0],
-          1,
-          coords[i][0] < coords[j][0] ? j : i,
-        ));
-      }
-    }
-    tIntersections.sort((a, b) => a.$1.compareTo(b.$1));
-    print("temp intersections: $tIntersections");
-
-    var isOutside = true;
-    var states = <bool>[true]; // true for outside, false for inside
-    for (int i = 0; i < tIntersections.length; i++) {
-      if (isOutside) {
-        isOutside = false;
-        states.add(isOutside);
-        intersections.add(tIntersections[i].$1);
-      } else {
-        if (tIntersections[i].$2 == 0) {
-          isOutside = true;
-          states.add(isOutside);
-          intersections.add(tIntersections[i].$1);
-        } else {
-          if (!states[i - 1] &&
-              tIntersections[i].$2 * tIntersections[i - 1].$2 < 0) {
-            final minIdx = min(tIntersections[i].$3, tIntersections[i - 1].$3);
-            final maxIdx = max(tIntersections[i].$3, tIntersections[i - 1].$3);
-          }
-        }
+      final y1 = min(verts[i][1], verts[j][1]);
+      final y2 = max(verts[i][1], verts[j][1]);
+      if (y1 < y && y < y2 && x1 < verts[i][0] && verts[i][0] < x2) {
+        return false;
       }
     }
 
-    for (int i = 0; i < tIntersections.length - 1; i += 2) {
-      if (tIntersections[i] <= x1 && x2 <= tIntersections[i + 1]) {
-        return true;
-      }
-    }
-    return false;
+    return true;
   }
 
-  bool checkVerticalSegmentInside(
-    List<List<int>> coords,
+  bool isVerticalSegmentClearOfPolygonEdges(
+    List<List<int>> verts,
     int y1,
     int y2,
     int x,
   ) {
-    // print("checkVerticalSegmentInside: $y1, $y2, $x");
-    var intersections = <int>[];
-    for (int i = 0; i < coords.length; i++) {
-      final j = i == coords.length - 1 ? 0 : i + 1;
-      if (coords[i][0] == coords[j][0]) {
-        // only check horizontal segments
+    for (int i = 0; i < verts.length; i++) {
+      final j = i == verts.length - 1 ? 0 : i + 1;
+      if (verts[i][0] == verts[j][0]) {
+        // only check horizontal edges
         continue;
       }
-      final x1 = min(coords[i][0], coords[j][0]);
-      final x2 = max(coords[i][0], coords[j][0]);
-      if (x1 <= x && x < x2) {
-        intersections.add(coords[i][1]);
+      final x1 = min(verts[i][0], verts[j][0]);
+      final x2 = max(verts[i][0], verts[j][0]);
+      if (x1 < x && x < x2 && y1 < verts[i][1] && verts[i][1] < y2) {
+        return false;
       }
     }
-    intersections.sort();
-    // print("intersections: $intersections");
-    for (int i = 0; i < intersections.length - 1; i += 2) {
-      if (intersections[i] <= y1 && y2 <= intersections[i + 1]) {
-        return true;
+
+    return true;
+  }
+
+  bool isPointInsideOrOnEdge(int x, int y, List<List<int>> verts) {
+    var onEdge = false;
+    for (int i = 0; i < verts.length; ++i) {
+      final j = i == verts.length - 1 ? 0 : i + 1;
+      if (verts[i][0] == verts[j][0]) {
+        final y1 = min(verts[i][1], verts[j][1]);
+        final y2 = max(verts[i][1], verts[j][1]);
+        if (y1 <= y && y <= y2 && x == verts[i][0]) {
+          onEdge = true;
+          break;
+        }
+      } else {
+        final x1 = min(verts[i][0], verts[j][0]);
+        final x2 = max(verts[i][0], verts[j][0]);
+        if (x1 <= x && x <= x2 && y == verts[i][1]) {
+          onEdge = true;
+          break;
+        }
       }
     }
-    return false;
+    if (onEdge) return true;
+
+    // check if inside polygon
+    var rayCrossings = 0;
+    for (int i = 0; i < verts.length; i++) {
+      final j = i == verts.length - 1 ? 0 : i + 1;
+      if (verts[i][1] == verts[j][1]) {
+        // only check vertical segments
+        continue;
+      }
+
+      final y1 = min(verts[i][1], verts[j][1]);
+      final y2 = max(verts[i][1], verts[j][1]);
+      if (y1 <= y && y < y2 && x < verts[i][0]) {
+        rayCrossings++;
+      }
+    }
+    return rayCrossings % 2 == 1;
   }
 }
