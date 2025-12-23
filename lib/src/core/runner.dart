@@ -12,6 +12,7 @@ import '../day08.dart' as day08;
 import '../day09.dart' as day09;
 import '../day10.dart' as day10;
 import '../day11.dart' as day11;
+import '../day12.dart' as day12;
 
 typedef PuzzleFactory = Puzzle Function();
 
@@ -28,6 +29,7 @@ class PuzzleRunner {
     () => day09.Day09(),
     () => day10.Day10(),
     () => day11.Day11(),
+    () => day12.Day12(),
   ];
 
   void run({required int day, required int part}) {
